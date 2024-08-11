@@ -1,35 +1,30 @@
 package com.zisis.medicine.medicine.service;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.zisis.medicine.medicine.dto.request.MedicineRequestDTO;
 import com.zisis.medicine.medicine.dto.request.MedicineSearchRequestDTO;
 import com.zisis.medicine.medicine.dto.response.MedicineResponseDTO;
 import com.zisis.medicine.medicine.entity.Medicine;
+import com.zisis.medicine.medicine.fhir.medication.MedicationService;
 import com.zisis.medicine.medicine.fhir.medicinalproductinteraction.MedicinalProductInteractionService;
 import com.zisis.medicine.medicine.persistence.IMedicineRepository;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.MedicinalProductInteraction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MedicineServiceImpl implements IMedicineService {
 
     private final IMedicineRepository medicineRepository;
-
-    private final IGenericClient fhirClient;
-
     private final MedicinalProductInteractionService medicinalProductInteractionService;
+    private final MedicationService medicationService;
 
     @Autowired
-    public MedicineServiceImpl(IMedicineRepository medicineRepository, IGenericClient fhirClient, MedicinalProductInteractionService medicinalProductInteractionService) {
+    public MedicineServiceImpl(IMedicineRepository medicineRepository, MedicationService medicationService, MedicinalProductInteractionService medicinalProductInteractionService) {
         this.medicineRepository = medicineRepository;
         this.medicinalProductInteractionService = medicinalProductInteractionService;
-        this.fhirClient = fhirClient;
+        this.medicationService = medicationService;
     }
 
     @Override
@@ -38,7 +33,7 @@ public class MedicineServiceImpl implements IMedicineService {
         List<String> interactionWarnings = medicinalProductInteractionService.checkForDrugInteractions(medicineRepository.findAll(), Medicine.fromRequestDTO(request));
 
         if (!interactionWarnings.isEmpty()) {
-            // Handle the interaction warning appropriately, e.g., log or notify the user
+            // Handle the interaction warning, logging for now
             System.out.println("Drug interactions found: " + String.join(", ", interactionWarnings));
         }
 

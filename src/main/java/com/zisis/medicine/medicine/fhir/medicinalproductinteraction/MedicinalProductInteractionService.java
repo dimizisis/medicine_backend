@@ -28,7 +28,7 @@ public class MedicinalProductInteractionService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getDrugInteractions(Medicine newMedicine, Medicine existingMedicine) {
+    private List<String> getDrugInteractions(Medicine newMedicine, Medicine existingMedicine) {
         Bundle bundle = fhirClient.search()
                 .forResource(MedicinalProductInteraction.class)
                 .where(MedicinalProductInteraction.SUBJECT.hasId(existingMedicine.getName()))
