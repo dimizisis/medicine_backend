@@ -16,8 +16,8 @@ For now, only the backend being developed.
 - **Java**: Programming language used for the backend.
 - **Spring Boot**: Framework for building the application.
 - **HAPI FHIR**: Library used to interact with FHIR resources.
-- **H2 Database**: In-memory database for storing medicine data.
-- **Maven/Gradle**: Dependency management and build tool.
+- **H2 Database**: In-memory database for storing medicine data. (test only)
+- **Maven**: Dependency management and build tool.
 
 ## Setup Instructions
 
