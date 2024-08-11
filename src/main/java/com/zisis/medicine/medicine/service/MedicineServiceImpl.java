@@ -1,37 +1,57 @@
 package com.zisis.medicine.medicine.service;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.zisis.medicine.medicine.dto.request.MedicineRequestDTO;
+import com.zisis.medicine.medicine.dto.request.MedicineSearchRequestDTO;
 import com.zisis.medicine.medicine.dto.response.MedicineResponseDTO;
 import com.zisis.medicine.medicine.entity.Medicine;
+import com.zisis.medicine.medicine.fhir.medicinalproductinteraction.MedicinalProductInteractionService;
 import com.zisis.medicine.medicine.persistence.IMedicineRepository;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MedicinalProductInteraction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicineServiceImpl implements IMedicineService {
 
-    IMedicineRepository medicineRepository;
+    private final IMedicineRepository medicineRepository;
+
+    private final IGenericClient fhirClient;
+
+    private final MedicinalProductInteractionService medicinalProductInteractionService;
 
     @Autowired
-    public MedicineServiceImpl(IMedicineRepository medicineRepository) {
+    public MedicineServiceImpl(IMedicineRepository medicineRepository, IGenericClient fhirClient, MedicinalProductInteractionService medicinalProductInteractionService) {
         this.medicineRepository = medicineRepository;
+        this.medicinalProductInteractionService = medicinalProductInteractionService;
+        this.fhirClient = fhirClient;
     }
 
     @Override
     public MedicineResponseDTO addMedicine(MedicineRequestDTO request) {
-        Medicine medicine = convertToEntity(request);
+
+        List<String> interactionWarnings = medicinalProductInteractionService.checkForDrugInteractions(medicineRepository.findAll(), Medicine.fromRequestDTO(request));
+
+        if (!interactionWarnings.isEmpty()) {
+            // Handle the interaction warning appropriately, e.g., log or notify the user
+            System.out.println("Drug interactions found: " + String.join(", ", interactionWarnings));
+        }
+
+        Medicine medicine = request.toMedicineEntity();
         Medicine savedMedicine = medicineRepository.save(medicine);
-        return convertToResponse(savedMedicine);
+        return MedicineResponseDTO.fromEntity(savedMedicine);
     }
 
     @Override
     public MedicineResponseDTO getMedicine(Long id) {
         Optional<Medicine> medicineOptional = medicineRepository.findById(id);
         return medicineOptional
-                .map(this::convertToResponse)
+                .map(MedicineResponseDTO::fromEntity)
                 .orElse(null);
     }
 
@@ -40,12 +60,12 @@ public class MedicineServiceImpl implements IMedicineService {
         Medicine existingMedicine = medicineRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid medicine ID"));
 
-        existingMedicine.setName(request.getName());
+        existingMedicine.setIngredient(request.getIngredient());
         existingMedicine.setExpiryDate(request.getExpiryDate());
         existingMedicine.setQuantity(request.getQuantity());
 
         Medicine updatedMedicine = medicineRepository.save(existingMedicine);
-        return convertToResponse(updatedMedicine);
+        return MedicineResponseDTO.fromEntity(updatedMedicine);
     }
 
     @Override
@@ -59,21 +79,17 @@ public class MedicineServiceImpl implements IMedicineService {
         return medicineRepository
                 .findAll()
                 .stream()
-                .map(this::convertToResponse)
+                .map(MedicineResponseDTO::fromEntity)
                 .toList();
     }
 
-    private Medicine convertToEntity(MedicineRequestDTO dto) {
-        return new Medicine(null,
-                dto.getName(),
-                dto.getExpiryDate(),
-                dto.getQuantity());
+    @Override
+    public List<MedicineResponseDTO> search(MedicineSearchRequestDTO dto) {
+        return medicineRepository
+                .findAllByIngredientOrManufacturer(dto.getIngredient(), dto.getManufacturer())
+                .stream()
+                .map(MedicineResponseDTO::fromEntity)
+                .toList();
     }
 
-    private MedicineResponseDTO convertToResponse(Medicine entity) {
-        return new MedicineResponseDTO(entity.getId(),
-                entity.getName(),
-                entity.getExpiryDate(),
-                entity.getQuantity());
-    }
 }

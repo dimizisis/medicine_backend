@@ -1,7 +1,9 @@
 package com.zisis.medicine.medicine.service;
 
 import com.zisis.medicine.medicine.dto.request.MedicineRequestDTO;
+import com.zisis.medicine.medicine.dto.request.MedicineSearchRequestDTO;
 import com.zisis.medicine.medicine.dto.response.MedicineResponseDTO;
+import com.zisis.medicine.medicine.entity.Medicine;
 
 import java.util.List;
 
@@ -15,4 +17,6 @@ public interface IMedicineService {
     void deleteMedicine(Long id);
 
     List<MedicineResponseDTO> listAllMedicines();
+
+    List<MedicineResponseDTO> search(MedicineSearchRequestDTO request);
 }
