@@ -3,6 +3,7 @@ package com.zisis.medicine.medicine.controller;
 import com.zisis.medicine.medicine.dto.request.MedicineRequestDTO;
 import com.zisis.medicine.medicine.dto.response.MedicineResponseDTO;
 import com.zisis.medicine.medicine.service.IMedicineService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/api/medicines")
 public class MedicineController {
 
     private IMedicineService medicineService;
@@ -22,7 +23,7 @@ public class MedicineController {
     }
 
     @PostMapping
-    public ResponseEntity<MedicineResponseDTO> addMedicine(@RequestBody MedicineRequestDTO request) {
+    public ResponseEntity<MedicineResponseDTO> addMedicine(@Valid @RequestBody MedicineRequestDTO request) {
         MedicineResponseDTO response = medicineService.addMedicine(request);
         return ResponseEntity.ok(response);
     }
