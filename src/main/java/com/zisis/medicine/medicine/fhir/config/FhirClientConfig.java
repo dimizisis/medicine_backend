@@ -1,4 +1,4 @@
-package com.zisis.medicine.medicine.config;
+package com.zisis.medicine.medicine.fhir.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

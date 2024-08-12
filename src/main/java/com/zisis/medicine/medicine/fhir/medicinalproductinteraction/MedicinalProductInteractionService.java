@@ -29,9 +29,10 @@ public class MedicinalProductInteractionService {
     }
 
     private List<String> getDrugInteractions(Medicine newMedicine, Medicine existingMedicine) {
+//        MedicinalProductInteraction.
         Bundle bundle = fhirClient.search()
                 .forResource(MedicinalProductInteraction.class)
-                .where(MedicinalProductInteraction.SUBJECT.hasId(existingMedicine.getName()))
+                .where(MedicinalProductInteraction.SUBJECT.hasAnyOfIds(List.of("Substance/71889")))
                 .returnBundle(Bundle.class)
                 .execute();
 

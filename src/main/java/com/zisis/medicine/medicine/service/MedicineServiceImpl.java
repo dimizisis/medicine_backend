@@ -30,6 +30,8 @@ public class MedicineServiceImpl implements IMedicineService {
     @Override
     public MedicineResponseDTO addMedicine(MedicineRequestDTO request) {
 
+//        medicationService.getMedicationSubstances();
+
         List<String> interactionWarnings = medicinalProductInteractionService.checkForDrugInteractions(medicineRepository.findAll(), Medicine.fromRequestDTO(request));
 
         if (!interactionWarnings.isEmpty()) {
